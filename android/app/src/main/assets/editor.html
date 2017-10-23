@@ -4389,18 +4389,18 @@
                         zss_editor.enabledEditingItems(e);
                         notifyIfSelectedTextHasChanged();//通知RN被选中的文本
 
-                    },600)
+                    },500)
 				}
 
 			});
 
             $(window).on('focusin', function (e) {
+
                 isFocusin = true;
                 zss_editor.debug('------------------focusin --------------------------')
                 if(onLongKeyDown){
 
                 }else{
-
                     setTimeout(function() {
                         zss_editor.calculateEditorHeightWithCaretPosition();
                         zss_editor.setScrollPosition();//通知RN，让webview，进行滚动
@@ -4414,19 +4414,33 @@
             });
 
 
+            $(window).on('focusout', function (e) {
+                zss_editor.debug('------------------focusout --------------------------')
+
+//                $('#zss_editor_content').html($('#zss_editor_content').innerHTML(' aaaaaaa'))
+//                document.getElementById("zss_editor_content").innerHTML = document.getElementById("zss_editor_content").innerHTML+' '
+            });
+
+
+
 			var onLongKeyDown = false;
 			var onLongPressTimeOut;
 
+			var startY;
 			$(window).on('touchmove', function (e) { //手势滑动时，隐藏键盘
 				zss_editor.debug('============ touchmove')
 				clearTimeout(onLongPressTimeOut);
 //                e.preventDefault();
 
-//                touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-//                if (touch.pageY - startY > 20 || touch.pageY - startY < -20) {
-//                    console.log("下划和下划");
+                var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+                if (touch.pageY - startY > 20 || touch.pageY - startY < -20) {
+                    zss_editor.debug('-----------------------上划和下划')
+                    if(!onLongKeyDown){
 //                    zss_editor.keyboardHide();
-//                } else  if(touch.pageX - startX > 20 || touch.pageX - startX < -20){
+
+					}
+                }
+//                else  if(touch.pageX - startX > 20 || touch.pageX - startX < -20){
 //
 //                };
 
@@ -4434,7 +4448,7 @@
                 if(onLongKeyDown){//长按事件
                     zss_editor.debug('=====touchmove======= onLongKeyDown; ' + onLongKeyDown)
                 }else{
-                    zss_editor.keyboardHide();
+//                    zss_editor.keyboardHide();
                     zss_editor.isDragging = true;
                     zss_editor.updateScrollOffset = true;
                     zss_editor.setScrollPosition();
@@ -4446,15 +4460,15 @@
 			$(window).on('touchstart', function (e) {
                 zss_editor.debug('============ touchstart')
 //                e.preventDefault();
-//              var touch = e.originalEvent,
+                var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
 //				startX = touch.changedTouches[0].pageX;
-//              startY = touch.changedTouches[0].pageY;
+                startY = touch.pageY;
 
 				//设置长按事件
                 onLongPressTimeOut = setTimeout(function() {
                     onLongKeyDown = true;
                     zss_editor.debug('===touchstart========= onLongKeyDown ;' + onLongKeyDown)
-                }, 800);
+                }, 600);
 
                 zss_editor.isDragging = false;
 			});
@@ -4467,7 +4481,6 @@
 
 			$(window).on('scroll', function (e) { //当HTML滚动时，通知WebView进行滚动
 				zss_editor.debug('============ scroll')
-
 
 			});
 
@@ -4519,7 +4532,13 @@
 				var text = event.clipboardData.getData('text/plain');
 				//用换行符将文本转换为Html
 				var html = convertTextToHtmlWithLineBreaks(text);
-				zss_editor.insertHTML(html);
+//				var html = replaceNewlinesWithLineBreaks(text);
+//				zss_editor.debug('paste paste paste paste paste' + html)
+                var html2 = '<br>' + html;
+//                zss_editor.debug('paste paste paste paste pastehtml2 = ' + html2)
+				zss_editor.insertHTML(html2);
+                zss_editor.blurContentEditor();
+//                zss_editor.insertHTML('<br /><br /><br /><br /><br />');
 			});
 		}
 
@@ -4622,15 +4641,26 @@
 
 
 		zss_editor.getCaretYPosition = function () {
-			var sel = window.getSelection();
-			// Next line is comented to prevent deselecting selection. It looks like work but if there are any issues will appear then uconmment it as well as code above.
+            var topPosition=0;
+            try{
+                var sel = window.getSelection();
+//                zss_editor.debug('=============window.getSelection()============' + sel)
+                // Next line is comented to prevent deselecting selection. It looks like work but if there are any issues will appear then uconmment it as well as code above.
 //			sel.collapseToStart();
-			var range = sel.getRangeAt(0);
-			var span = document.createElement('span'); // something happening here preventing selection of elements
-			range.collapse(false);
-			range.insertNode(span);
-			var topPosition = span.offsetTop;
-			span.parentNode.removeChild(span);
+
+                var range = sel.getRangeAt(0);
+//                zss_editor.debug('=============sel.getRangeAt(0)============' + range)
+                var span = document.createElement('span'); // something happening here preventing selection of elements
+                range.collapse(false);
+                range.insertNode(span);
+                topPosition = span.offsetTop;
+                span.parentNode.removeChild(span);
+            }catch (e){
+                topPosition = 0;
+//                document.getElementById("zss_editor_content").focus();
+            }
+
+//			zss_editor.debug('-------------------  topPosition ---------' + topPosition)
 			return topPosition;
 		}
 
@@ -4677,6 +4707,7 @@
 			var futureEditorHeight = caretYPosition + lineHeight;
 
             if(caretYPosition < editorHeight){
+//                window.scrollTo(0, lineHeight);
                 return;
             }
 
@@ -5302,9 +5333,10 @@
 //				'</div>');
 //            imageContainer.find('#imga img').attr(attrs);
 
+            var deleteIcon = zss_editor.platform ==='ios'? '../img/icon_format_link@1.5x.png' : './icon_format_link@1.5x.png'
             var html = '<div id="img_container" align="center" >' +
 				'<div style="position:relative; width:'+attrs.width+'px; height: '+attrs.height+'px;" >' +
-				'<a id="img_close" style=" position:absolute; right: -10px; top: -15px;"><img src="../img/icon_format_link@1.5x.png"></a>' +
+				'<a id="img_close" style=" position:absolute; right: -10px; top: -15px;"><img src="'+deleteIcon+'"></a>' +
 				'<a id="imga" href="' + attrs.src + '"><img style=" width="'+attrs.width+'" height="'+attrs.height+'" src="'+attrs.src+ '"></a>' +
 				'' +
 				'</div></div>'
@@ -5312,7 +5344,7 @@
 
 //			zss_editor.debug(html)
 
-			zss_editor.insertHTML('<br><br><br>' +  html + '<br><br>');
+			zss_editor.insertHTML('<br>' +  html + '<br><br>');
 
 
 
@@ -5593,6 +5625,7 @@
 		}
 
 		zss_editor.blurContentEditor = function () {
+            window.last_range = window.getSelection().getRangeAt(0);
 			$('#zss_editor_content').blur();
             zss_editor.debug('blurContentEditor --- keyboard --- hide')
 		}
@@ -5659,6 +5692,7 @@
 
 		html,
 		body {
+
 			padding: 0;
 			margin: auto;
 			font-family: Arial, Helvetica, sans-serif;
@@ -5704,7 +5738,9 @@
 			color: #000;
 			width: 98%;
 			height: 98%;
-			-webkit-overflow-scrolling: touch;
+            min-height:200px;
+            /*padding: 10px;*/
+			/*-webkit-overflow-scrolling: touch;*/
 			/*overflow: auto;*/
 			/*background-color: green;*/
 		}
@@ -5822,7 +5858,7 @@
 	<div id="separatorContainer">
 		<hr>
 	</div>
-	<div id="zss_editor_content" class="zss_editor_content" contenteditable="true" placeholder=""></div>
+	<div id="zss_editor_content"  class="zss_editor_content" contenteditable="true" placeholder=""></div>
 	 <div id="zss_editor_footer"></div>
 	<!--<div id="createtable"></div>-->
 </body>

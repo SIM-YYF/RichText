@@ -109,6 +109,7 @@ export default class RichTextEditor extends Component {
   _onKeyboardWillHide(event) {
     this.blurTitleEditor();
     this.blurContentEditor();
+
     this.setState({ keyboardHeight: 0 });
   }
   //当键盘显示时，调整文本编辑器的高度
@@ -321,9 +322,9 @@ export default class RichTextEditor extends Component {
         case messages.SELECTION_CHANGE: {
           const items = message.data.items;
             console.log("========== SELECTION_CHANGE ======= items", items)
-          this.state.selectionChangeListeners.map(listener => {
-            listener(items);
-          });
+          // this.state.selectionChangeListeners.map(listener => {
+          //   listener(items);
+          // });
           break;
         }
         case messages.CONTENT_CHANGE: {
@@ -584,6 +585,8 @@ export default class RichTextEditor extends Component {
           injectedJavaScript={injectScript}
           source={pageSource}
           onLoad={() => this.init()}
+          automaticallyAdjustContentInsets={true}
+
         />
 
         {this._renderLinkModal()}

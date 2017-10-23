@@ -382,8 +382,8 @@ export default class RichTextEditor extends Component {
   render() {
     //in release build, external html files in Android can't be required, so they must be placed in the assets folder and accessed via uri
     const pageSource = PlatformIOS
-      ? require("./editor.html")
-      : { uri: "file:///android_asset/editor.html" };
+      ? require("./editor_div_scroll.html")
+      : { uri: "file:///android_asset/editor_div_scroll.html" };
     return (
       <View style={{ flex: 1 }}>
         <WebViewBridge
