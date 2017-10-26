@@ -15,6 +15,7 @@
 		"react-native-image-zoom-viewer": "^2.0.10",
 		"react-native-permissions": "^1.0.1",
 		"react-native-sound": "^0.10.4",
+		"react-native-webview-bridge": "^0.33.0",
 		"react-native-webview-bridge-updated": "^1.0.8"
 	},
 	"devDependencies": {

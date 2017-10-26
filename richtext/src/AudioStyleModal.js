@@ -116,21 +116,20 @@ class AudioStyleModal extends Component {
               >
                 <Image
                   style={
-                    !this.state.isRecord
-                      ? { width: 90, height: 90 }
-                      : { width: 150, height: 150 }
-                  }
-                  source={
                     this.state.isRecord
-                      ? require("../img/voice_recording.gif")
-                      : require("../img/record_icon.png")
+                      ? { width: 120, height: 120 }
+                      : { width: 120, height: 120 }
                   }
+                   source={
+                     this.state.isRecord
+                       ? require("../img/voice_recording.gif")
+                       : require("../img/record_icon.png")
+                   }
                 />
               </TouchableOpacity>
             </View>
           </View>
-        </Modal
-          >
+        </Modal>
       </View>
     );
   }
